@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tasksync/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_state.dart';
-import 'package:tasksync/features/auth/presentation/pages/register_page.dart';
+import '../bloc/auth_bloc.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  LoginPage({super.key});
+  RegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("TaskSync - Login")),
+      appBar: AppBar(title: const Text('TaskSync - Criar Conta')),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
@@ -33,40 +32,32 @@ class LoginPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           return Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextField(
                   controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Senha'),
                   obscureText: true,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
                     context.read<AuthBloc>().add(
-                      SignInRequested(
+                      SignUpRequested(
                         _emailController.text,
                         _passwordController.text,
                       ),
                     );
                   },
-                  child: Text('Login'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RegisterPage()),
-                    );
-                  },
-                  child: const Text('Não tem uma conta? Cadastre-se'),
+                  child: const Text('Cadastrar'),
                 ),
               ],
             ),
