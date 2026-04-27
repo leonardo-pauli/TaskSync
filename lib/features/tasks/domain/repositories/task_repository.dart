@@ -1,4 +1,4 @@
-import 'package:tasksync/features/auth/domain/entities/task_entity.dart';
+import 'package:tasksync/features/tasks/domain/entities/task_entity.dart';
 
 abstract class TaskRepository {
   Future<List<TaskEntity>> getTasks(String userId);
