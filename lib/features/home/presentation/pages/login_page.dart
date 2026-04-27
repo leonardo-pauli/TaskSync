@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_state.dart';
-import 'package:tasksync/features/auth/presentation/pages/register_page.dart';
+import 'package:tasksync/features/home/presentation/pages/register_page.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
