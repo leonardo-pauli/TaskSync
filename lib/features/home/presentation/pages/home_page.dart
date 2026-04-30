@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tasksync/features/auth/presentation/bloc/auth_state.dart';
+import 'package:tasksync/features/home/presentation/widgets/task_item_widget.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import 'package:tasksync/features/tasks/presentation/bloc/task_bloc.dart';
 import 'package:tasksync/features/tasks/domain/entities/task_entity.dart';
@@ -64,7 +65,6 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   final authState = context.read<AuthBloc>().state;
-
                   if (authState is AuthAuthenticated) {
                     final newTask = TaskEntity(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -73,9 +73,7 @@ class _HomePageState extends State<HomePage> {
                       createdAt: DateTime.now(),
                       userId: authState.user.id,
                     );
-
                     context.read<TaskBloc>().add(AddTask(newTask));
-
                     _titleController.clear();
                     _descController.clear();
                     Navigator.pop(context);
@@ -110,75 +108,58 @@ class _HomePageState extends State<HomePage> {
             Navigator.of(context).pushReplacementNamed('/');
           }
         },
-        child: BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            if (state is TaskLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
+        child: BlocListener<TaskBloc, TaskState>(
+          listener: (context, state) {
             if (state is TaskError) {
-              return Center(child: Text(state.message));
-            }
-
-            if (state is TaskLoaded) {
-              final tasks = state.tasks;
-
-              if (tasks.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'Você não tem nenhuma tarefa.\nClique no + para adicionar.',
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        task.title,
-                        style: TextStyle(
-                          decoration: task.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                      ),
-                      subtitle: Text(task.description),
-                      leading: Checkbox(
-                        value: task.isCompleted,
-                        onChanged: (bool? value) {
-                          if (value != null) {
-                            final updateTask = task.copyWith(
-                              isCompleted: value,
-                            );
-                            context.read<TaskBloc>().add(
-                              UpdateTask(updateTask),
-                            );
-                          }
-                        },
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          context.read<TaskBloc>().add(DeleteTask(task.id));
-                        },
-                      ),
-                    ),
-                  );
-                },
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             }
-
-            return const SizedBox.shrink();
           },
+          child: BlocBuilder<TaskBloc, TaskState>(
+            builder: (context, state) {
+              if (state is TaskLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is TaskLoaded) {
+                final tasks = state.tasks;
+
+                if (tasks.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Você não tem nenhuma tarefa.\nClique no + para adicionar.',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return TaskItemWidget(
+                      task: task,
+                      onToggle: (newValue) {
+                        if (newValue != null) {
+                          final updatedTask = task.copyWith(
+                            isCompleted: newValue,
+                          );
+                          context.read<TaskBloc>().add(UpdateTask(updatedTask));
+                        }
+                      },
+                      onDelete: () {
+                        context.read<TaskBloc>().add(DeleteTask(task.id));
+                      },
+                    );
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

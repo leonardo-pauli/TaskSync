@@ -39,8 +39,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onUpdateTask(UpdateTask event, Emitter<TaskState> emit) async {
     try {
       await taskRepository.updateTask(event.task);
-      final tasks = await taskRepository.getTasks(event.task.userId);
-      emit(TaskLoaded(tasks));
+      if (state is TaskLoaded) {
+        final currentTasks = (state as TaskLoaded).tasks;
+        final updateTasks = currentTasks.map((t) {
+          return t.id == event.task.id ? event.task : t;
+        }).toList();
+        emit(TaskLoaded(updateTasks));
+      }
     } catch (e) {
       emit(TaskError(e.toString()));
     }
