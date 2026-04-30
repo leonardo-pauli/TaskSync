@@ -30,7 +30,6 @@ class _HomePageState extends State<HomePage> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
 
-  // 2. Função que abre o pop-up
   void _showAddTaskDialog() {
     showDialog(
       context: context,
@@ -155,11 +154,22 @@ class _HomePageState extends State<HomePage> {
                       subtitle: Text(task.description),
                       leading: Checkbox(
                         value: task.isCompleted,
-                        onChanged: (bool? value) {},
+                        onChanged: (bool? value) {
+                          if (value != null) {
+                            final updateTask = task.copyWith(
+                              isCompleted: value,
+                            );
+                            context.read<TaskBloc>().add(
+                              UpdateTask(updateTask),
+                            );
+                          }
+                        },
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {},
+                        onPressed: () {
+                          context.read<TaskBloc>().add(DeleteTask(task.id));
+                        },
                       ),
                     ),
                   );
